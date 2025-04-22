@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spell Points Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0c001f, #1a0033);
+      color: white;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1, h2 {
+      text-align: center;
+      text-shadow: 0 0 10px #7b2cbf;
+    }
+    .tracker {
+      max-width: 700px;
+      margin: auto;
+      background: rgba(255,255,255,0.05);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 25px #7b2cbf55;
+      text-align: center;
+    }
+    .bar {
+      background: rgba(255,255,255,0.1);
+      height: 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+    .fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7b2cbf, #c77dff);
+      transition: width 1s ease-in-out;
+    }
+    .info {
+      font-size: 1.2rem;
+      margin-top: 10px;
+    }
+    .goals {
+      margin-top: 30px;
+    }
+    .goal {
+      background: rgba(255,255,255,0.08);
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 10px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>📈 Membership Progress</h1>
+  <div class="tracker">
+    <h2>Your Spell Points</h2>
+    <div class="bar"><div id="fillBar" class="fill" style="width: 0%"></div></div>
+    <div class="info" id="pointsDisplay">Loading...</div>
+    <div class="info" id="tierDisplay">Tier: Loading...</div>
+
+    <div class="goals">
+      <h2>Next Goals</h2>
+      <div class="goal">🪄 100 Spell Points → Unlock Magic Apple Pin</div>
+      <div class="goal">🔮 250 Spell Points → Get VIP Spring Formal Access</div>
+      <div class="goal">🧙‍♂️ 500 Spell Points → Become an Archmage</div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      // Add your Firebase config here
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    firebase.auth().onAuthStateChanged(async user => {
+      if (user) {
+        const doc = await db.collection("users").doc(user.uid).get();
+        const points = doc.data().spellPoints || 0;
+        const tier = doc.data().tier || "Apprentice";
+
+        const fillPercent = Math.min(points / 500 * 100, 100);
+
+        document.getElementById("fillBar").style.width = fillPercent + "%";
+        document.getElementById("pointsDisplay").innerText = points + " 🪙 Spell Points";
+        document.getElementById("tierDisplay").innerText = "Tier: " + tier;
+      }
+    });
+  </script>
+</body>
+</html>

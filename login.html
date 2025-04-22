@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spells Store Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+  <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(ellipse at top, #1a0033, #0c001f);
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    nav {
+      background: rgba(0,0,0,0.3);
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 0 15px #7b2cbf55;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 1rem;
+      font-weight: bold;
+    }
+    .login-box {
+      max-width: 500px;
+      margin: 5% auto;
+      background: rgba(255,255,255,0.05);
+      padding: 40px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 0 30px #7b2cbf55;
+    }
+    h1 {
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #7b2cbf;
+    }
+    input {
+      padding: 10px;
+      width: 80%;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+    }
+    .btn {
+      background: linear-gradient(135deg, #7b2cbf, #c77dff);
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      border-radius: 999px;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 0 10px #7b2cbf;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="quests.html">Quests</a>
+    <a href="spellsstore.html">Shop</a>
+    <a href="catalogue.html">Rewards</a>
+    <a href="points.html">Progress</a>
+    <a href="class.html">Class ID</a>
+    <a href="eden.html">Eden</a>
+  </nav>
+
+  <div class="login-box">
+    <h1>🔐 Log in to Spells.Store</h1>
+    <input type="email" id="email" placeholder="Harvard Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button class="btn" onclick="emailLogin()">Login with Email</button>
+    <br><br>
+    <button class="btn" onclick="googleLogin()">Login with Google</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      // Add your Firebase config here
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function isHarvardEmail(email) {
+      return email.endsWith('@harvard.edu');
+    }
+
+    function assignDefaultTier(userId, email) {
+      const isAmbassador = email.includes("elisepham");
+      const tier = isAmbassador ? "Archmage" : "Apprentice";
+
+      db.collection('users').doc(userId).set({
+        email: email,
+        tier: tier,
+        ambassador: isAmbassador
+      }, { merge: true });
+    }
+
+    function redirectAfterLogin() {
+      window.location.href = 'class.html';
+    }
+
+    function emailLogin() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      if (!isHarvardEmail(email)) return alert("Harvard email required.");
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(cred => {
+          assignDefaultTier(cred.user.uid, email);
+          redirectAfterLogin();
+        })
+        .catch(err => {
+          if (err.code === "auth/user-not-found") {
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+              .then(cred => {
+                assignDefaultTier(cred.user.uid, email);
+                redirectAfterLogin();
+              });
+          } else {
+            alert(err.message);
+          }
+        });
+    }
+
+    function googleLogin() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider).then(result => {
+        const email = result.user.email;
+        if (!isHarvardEmail(email)) {
+          firebase.auth().signOut();
+          return alert("Only Harvard emails allowed.");
+        }
+        assignDefaultTier(result.user.uid, email);
+        redirectAfterLogin();
+      }).catch(err => {
+        alert(err.message);
+      });
+    }
+
+    document.addEventListener('musickitloaded', () => {
+      MusicKit.configure({
+        developerToken: 'YOUR_APPLE_DEVELOPER_TOKEN',
+        app: { name: 'Garden of Eden', build: '1.0' }
+      });
+      const music = MusicKit.getInstance();
+      music.setQueue({ songs: ['YOUR_SONG_ID'] }).then(() => music.play());
+    });
+  </script>
+</body>
+</html>

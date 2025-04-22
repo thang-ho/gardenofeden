@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Garden of Eden | Quests</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0c001f, #1a0033);
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 1.2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .dashboard {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      box-shadow: 0 0 30px #7b2cbf33;
+    }
+    h1, h2 {
+      text-align: center;
+      text-shadow: 0 0 10px #7b2cbf;
+    }
+    .quest-list {
+      margin-top: 30px;
+    }
+    .quest {
+      background: rgba(255,255,255,0.08);
+      margin-bottom: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      transition: 0.3s ease;
+    }
+    .quest:hover {
+      background: rgba(255,255,255,0.15);
+      transform: scale(1.02);
+    }
+    .btn {
+      background: linear-gradient(135deg, #7b2cbf, #c77dff);
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      border-radius: 999px;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 0 10px #7b2cbf;
+    }
+    .points {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>🌌 Welcome to Your Magical Quest Dashboard</header>
+  <div class="dashboard">
+    <h1>Your Class: <span id="userClass">Loading...</span></h1>
+    <div class="points">Spell Points: <span id="spellPoints">0</span></div>
+    <h2>Available Quests</h2>
+    <div class="quest-list" id="quests"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      // Add your Firebase config here
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const mbtiClasses = {
+      INTJ:"Sorcerer", INTP:"Wizard", ENTJ:"Warlock", ENTP:"Alchemist",
+      INFJ:"Druid", INFP:"Healer", ENFJ:"Paladin", ENFP:"Bard",
+      ISTJ:"Knight", ISFJ:"Guardian", ESTJ:"Commander", ESFJ:"Cleric",
+      ISTP:"Rogue", ISFP:"Ranger", ESTP:"Warrior", ESFP:"Berserker"
+    };
+
+    firebase.auth().onAuthStateChanged(async user => {
+      if (user) {
+        const userRef = db.collection('users').doc(user.uid);
+        const doc = await userRef.get();
+
+        let mbti = doc.exists ? doc.data().mbti : prompt("Enter your MBTI:").toUpperCase();
+        let userClass = mbtiClasses[mbti] || "Adventurer";
+
+        document.getElementById('userClass').innerText = userClass;
+
+        if (!doc.exists) {
+          await userRef.set({ mbti, userClass, spellPoints: 0 }, { merge: true });
+        }
+
+        userRef.onSnapshot(docSnap => {
+          document.getElementById('spellPoints').innerText = docSnap.data().spellPoints || 0;
+        });
+
+        db.collection('quests')
+          .where('requiredClass', 'in', [userClass, 'Any'])
+          .get()
+          .then(snapshot => {
+            const questContainer = document.getElementById('quests');
+            questContainer.innerHTML = '';
+            snapshot.forEach(doc => {
+              const quest = doc.data();
+              const div = document.createElement('div');
+              div.classList.add('quest');
+              div.innerHTML = `
+                <h3>${quest.title}</h3>
+                <p>${quest.description}</p>
+                <button class="btn" onclick="completeQuest('${doc.id}', ${quest.points})">Complete Quest +${quest.points}🪙</button>
+              `;
+              questContainer.appendChild(div);
+            });
+          });
+      }
+    });
+
+    function completeQuest(questId, points) {
+      const user = firebase.auth().currentUser;
+      if (!user) return;
+
+      const userRef = db.collection('users').doc(user.uid);
+      const progressRef = userRef.collection('questProgress').doc(questId);
+
+      progressRef.set({ status: 'completed', timestamp: new Date() });
+      userRef.update({ spellPoints: firebase.firestore.FieldValue.increment(points) });
+
+      alert("Quest completed! Spell Points earned: " + points);
+    }
+  </script>
+</body>
+</html>

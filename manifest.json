@@ -1,0 +1,9 @@
+{
+  "short_name": "GardenEden",
+  "name": "Garden of Eden RPG",
+  "icons": [{"src":"icon.png","sizes":"512x512","type":"image/png"}],
+  "start_url": "index.html",
+  "display": "standalone",
+  "theme_color": "#7b2cbf",
+  "background_color": "#0c001f"
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quest Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0c001f, #1a0033);
+      color: white;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      text-shadow: 0 0 10px #7b2cbf;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+      background: rgba(255,255,255,0.05);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 25px #7b2cbf55;
+    }
+    input, textarea, select {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+    }
+    .btn {
+      background: linear-gradient(135deg, #7b2cbf, #c77dff);
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #7b2cbf;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧙‍♂️ Quest Admin Panel</h1>
+  <form onsubmit="createQuest(event)">
+    <input type="text" id="title" placeholder="Quest Title" required />
+    <textarea id="description" placeholder="Quest Description" rows="4" required></textarea>
+    <select id="requiredClass">
+      <option value="Any">Any Class</option>
+      <option value="Sorcerer">Sorcerer</option>
+      <option value="Wizard">Wizard</option>
+      <option value="Warlock">Warlock</option>
+      <option value="Alchemist">Alchemist</option>
+      <option value="Druid">Druid</option>
+      <option value="Healer">Healer</option>
+      <option value="Paladin">Paladin</option>
+      <option value="Bard">Bard</option>
+      <option value="Knight">Knight</option>
+      <option value="Guardian">Guardian</option>
+      <option value="Commander">Commander</option>
+      <option value="Cleric">Cleric</option>
+      <option value="Rogue">Rogue</option>
+      <option value="Ranger">Ranger</option>
+      <option value="Warrior">Warrior</option>
+      <option value="Berserker">Berserker</option>
+    </select>
+    <input type="number" id="points" placeholder="Spell Points Reward" required />
+    <button class="btn" type="submit">Create Quest</button>
+  </form>
+
+  <script>
+    const firebaseConfig = {
+      // Add your Firebase config here
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user || !user.email.endsWith("@harvard.edu")) {
+        alert("Access denied: Admins only.");
+        window.location.href = "login.html";
+      }
+    });
+
+    function createQuest(e) {
+      e.preventDefault();
+      const title = document.getElementById("title").value;
+      const description = document.getElementById("description").value;
+      const requiredClass = document.getElementById("requiredClass").value;
+      const points = parseInt(document.getElementById("points").value);
+
+      db.collection("quests").add({ title, description, requiredClass, points })
+        .then(() => {
+          alert("Quest created successfully!");
+          document.querySelector("form").reset();
+        })
+        .catch(err => alert("Error creating quest: " + err.message));
+    }
+  </script>
+</body>
+</html>

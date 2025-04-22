@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Garden of Magical Apple-ratus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+  <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0c001f, #1a0033);
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      text-align: center;
+      padding: 2rem 1rem;
+      background: rgba(255,255,255,0.05);
+      box-shadow: 0 0 10px #7b2cbf55;
+    }
+    .catalogue {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      padding: 2rem;
+    }
+    .item {
+      background: rgba(255,255,255,0.05);
+      border-radius: 1rem;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 0 15px #7b2cbf33;
+    }
+    .item img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 0.5rem;
+    }
+    .btn {
+      background: linear-gradient(135deg, #7b2cbf, #c77dff);
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      border-radius: 999px;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 0 10px #7b2cbf;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🧃 Garden of Magical Apple-ratus</h1>
+    <p>Redeem spell points for magical Apple-grade devices.</p>
+  </header>
+
+  <div class="catalogue" id="catalogueList">
+    <div class="item">
+      <img src="https://via.placeholder.com/300x200?text=MagicMac+Pro" alt="MagicMac Pro"/>
+      <h3>MagicMac Pro (2025)</h3>
+      <p>Cost: 500 🪙 Spell Points</p>
+      <button class="btn">Redeem</button>
+    </div>
+    <div class="item">
+      <img src="https://via.placeholder.com/300x200?text=iMagicPhone+15" alt="iMagicPhone 15"/>
+      <h3>iMagicPhone 15</h3>
+      <p>Cost: 400 🪙 Spell Points</p>
+      <button class="btn">Redeem</button>
+    </div>
+    <div class="item">
+      <img src="https://via.placeholder.com/300x200?text=MagicBook+Air" alt="MagicBook Air"/>
+      <h3>MagicBook Air</h3>
+      <p>Cost: 350 🪙 Spell Points</p>
+      <button class="btn">Redeem</button>
+    </div>
+    <div class="item">
+      <img src="https://via.placeholder.com/300x200?text=iScrollPad+Pro" alt="iScrollPad Pro"/>
+      <h3>iScrollPad Pro</h3>
+      <p>Cost: 300 🪙 Spell Points</p>
+      <button class="btn">Redeem</button>
+    </div>
+    <div class="item">
+      <img src="https://via.placeholder.com/300x200?text=MagicPod+Studio" alt="MagicPod Studio"/>
+      <h3>MagicPod Studio</h3>
+      <p>Cost: 200 🪙 Spell Points</p>
+      <button class="btn">Redeem</button>
+    </div>
+    <div class="item">
+      <img src="https://via.placeholder.com/300x200?text=VisionMagic+XR" alt="VisionMagic XR"/>
+      <h3>VisionMagic XR</h3>
+      <p>Cost: 1000 🪙 Spell Points</p>
+      <button class="btn">Redeem</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('musickitloaded', () => {
+      MusicKit.configure({
+        developerToken: 'YOUR_APPLE_DEVELOPER_TOKEN',
+        app: { name: 'Garden of Eden', build: '1.0' }
+      });
+      const music = MusicKit.getInstance();
+      music.setQueue({ songs: ['YOUR_SONG_ID'] }).then(() => music.play());
+    });
+  </script>
+</body>
+</html>
